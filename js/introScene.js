@@ -10,7 +10,6 @@
 this.geekpartyjs = this.geekpartyjs || {};
 
 
-
 ( function() {
 
     var IntroScene = function() {
@@ -21,13 +20,17 @@ this.geekpartyjs = this.geekpartyjs || {};
 
     p.enterScene = function()
     {
-        this.menuItems = [ new geekpartyjs.MenuItem('play', canvas.width/2, canvas.height/2)
+        this.menuItems = [ new geekpartyjs.MenuItem('play1', canvas.width/2, canvas.height/2)
                           , new geekpartyjs.MenuItem('credits', canvas.width/2, canvas.height/2 + 40) ];
+
+        this.currentItemInd = 0;
 
         for (var i=0;i<this.menuItems.length; i++)
         {
             geekpartyjs.Game.prototype.addEntity(this.menuItems[i]);
         }
+
+        //geekpartyjs.Game.prototype.addEntity()
     }
 
     p.drawBack   = function(ctx)

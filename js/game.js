@@ -62,7 +62,7 @@ this.geekpartyjs = this.geekpartyjs || {};
 
     p.addEntity = function(entity)
     {
-        if (entity.animate)
+        if (entity.hasOwnProperty("animate"))
         {
             this.animationSystem.addComponent(entity);
         }
