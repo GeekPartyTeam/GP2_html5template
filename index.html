@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Geek party</title>
+
+    <script src="js/rAF.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/introScene.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/scene.js"></script>
+    <script src="js/componentContainer.js"></script>
+    <script src="js/animationSystem.js"></script>
+    <script src="js/renderSystem.js"></script>
+    <script src="js/gui.js"></script>
+
+
+    <script>
+        function init()
+        {
+           var game = new geekpartyjs.Game(canvas);
+           game.setFPS(60);
+
+           game.setCurrentScene( game.introScene );
+           game.startGameLoop();
+        }
+    </script>
+</head>
+<body onload="init()">
+    <canvas width="640" height="480" id="canvas"></canvas>
+                                                                                                                                                                 <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=2"></' + 'script>')</script>
+</body>
+</html>
