@@ -22,12 +22,7 @@ this.geekpartyjs = this.geekpartyjs || {};
         ctx = canvas.getContext("2d");
         fps = 60;
 
-        //initialize game systems
-        p.animationSystem = new geekpartyjs.AnimationSystem();
-        p.renderSystem    = new geekpartyjs.RenderSystem();
-
-
-        p.introScene = new geekpartyjs.IntroScene();
+        p.introScene = new geekpartyjs.IntroScene(c);
     }
 
     p.clear = function() {
@@ -40,39 +35,22 @@ this.geekpartyjs = this.geekpartyjs || {};
 
     p.update = function(dt) {
         if (!c) { return; }
-        //clear
-        p.clear();
 
-        //var ctx = this.canvas.getContext("2d");
+        p.clear();
         ctx.save();
 
         if (currentScene)
         {
-            currentScene.drawBack(ctx);
+            currentScene.update(dt);
+            currentScene.draw(ctx);
         }
 
-        p.animationSystem.update(dt);
-        p.renderSystem.update(dt);
         ctx.restore();
     }
 
     p.setFPS = function(val) {
         this.fps = val;
     }
-
-    p.addEntity = function(entity)
-    {
-        if (entity.hasOwnProperty("animate"))
-        {
-            this.animationSystem.addComponent(entity);
-        }
-
-        if (entity.render)
-        {
-            this.renderSystem.addComponent(entity);
-        }
-    }
-
 
     var tick = function() {
         setTimeout(function() {
@@ -92,17 +70,12 @@ this.geekpartyjs = this.geekpartyjs || {};
         tick();
     }
 
-
-
     p.setCurrentScene = function(scene) {
         currentScene = scene;
-        //p.updateCurrentScene = scene.update;
-        //p.drawCurrentScene   = scene.draw;
         scene.enterScene();
     }
 
 
     geekpartyjs.Game = Game;
-
 
 }())

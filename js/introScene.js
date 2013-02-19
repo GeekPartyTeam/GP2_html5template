@@ -57,26 +57,50 @@ this.geekpartyjs.intro = this.geekpartyjs.intro || {};
 
 ( function() {
 
-    var IntroScene = function() {
-        this.initialize();
+    var IntroScene = function(canvas) {
+        this.initialize(canvas);
     }
 
     var p = IntroScene.prototype = new geekpartyjs.Scene();
 
     p.enterScene = function()
     {
-        this.menu = new geekpartyjs.intro.Menu(canvas.width/2, canvas.height/2);
-        geekpartyjs.Game.prototype.addEntity(this.menu);
+        //this.menu = new geekpartyjs.intro.Menu(canvas.width/2, canvas.height/2);
+        //geekpartyjs.Game.prototype.addEntity(this.menu);
+
+        this.background = new geekpartyjs.DisplayObject(0, 0, 0, 0, this.width, this.height);
+
+        this.background.render = function(ctx)
+        {
+            ctx.fillStyle = "cyan";
+            ctx.fillRect(0, 0, this.width, this.height);
+        }
+        this.addChild(this.background);
+
+
+        var scene = this;
+
+
+
+        geekpartyjs.helper_spriteCreateSimple("img/sprite.png"
+                        , 6 //cols
+                        , 4 //rows
+                        , 2 //fps
+                        , function(spr)
+                        {
+                            scene.sprite = spr;
+                            scene.addChild(spr);
+                            spr.play(-1);
+                            spr.x = 100;
+                        })
     }
 
-    p.drawBack   = function(ctx)
+    p.update = function(dt)
     {
-
-        ctx.save();
-        ctx.fillStyle = "cyan";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        ctx.restore();
+        if(this.sprite) this.sprite.update(dt/1000);
     }
+
+
 
     geekpartyjs.IntroScene = IntroScene;
 
