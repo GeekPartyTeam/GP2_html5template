@@ -1,0 +1,167 @@
+=========== Prototype ==============
+
+Every object is linked to a prototype object from which it can inherit properties. All objects created from
+object literals are linked to Object.prototype, an object that comes standard with JavaScript/
+
+The prototype link is used only in retrieval. If we try to retrieve a property value from an object, and if the
+object lacks the property name, then JavaScript attempts to retrieve the property value from the prototype
+object. And if that object is lacking the property, then it goes to its prototype, and so on until the process
+finally bottoms out with Object.prototype. If the desired property exists nowhere in the prototype
+chain, then the result is the undefined value. This is called delegation.
+
+The prototype relationship is a dynamic relationship. If we add a new property to a prototype, that property
+will immediately be visible in all of the objects that are based on that prototype:
+
+stooge.profession = 'actor';
+another_stooge.profession    // 'actor'
+
+
+
+========== Function Objects =========
+
+Functions in JavaScript are objects. Objects are collections of name/value pairs having a hidden link to a
+prototype object. Objects produced from object literals are linked to Object.prototype. Function objects
+are linked to Function.prototype (which is itself linked to Object.prototype). Every function is
+also created with two additional hidden properties: the function's context and the code that implements the
+function's behavior.
+
+Every function object is also created with a prototype property. Its value is an object with a
+constructor property whose value is the function. This is distinct from the hidden link to
+Function.prototype. The meaning of this convoluted construction will be revealed in the next chapter.
+Since functions are objects, they can be used like any other value. Functions can be stored in variables,
+objects, and arrays. Functions can be passed as arguments to functions, and functions can be returned from
+functions. Also, since functions are objects, functions can have methods.
+
+The thing that is special about functions is that they can be invoked.
+
+
+=== The Method Invocation Pattern ===
+
+When a function is stored as a property of an object, we call it a method. When a method is invoked, this is
+bound to that object. If an invocation expression contains a refinement (that is, a . dot expression or
+[subscript] expression), it is invoked as a method:
+
+// Create myObject. It has a value and an increment
+// method. The increment method takes an optional
+// parameter. If the argument is not a number, then 1
+// is used as the default.
+
+var myObject = {
+    value: 0;
+    increment: function (inc) {
+        this.value += typeof inc === 'number' ? inc : 1;
+    }
+};
+myObject.increment(  );
+document.writeln(myObject.value);    // 1
+myObject.increment(2);
+document.writeln(myObject.value);    // 3
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! READ THIS:   IMPORTANT    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+===  The Function Invocation Pattern ===
+
+When a function is not the property of an object, then it is invoked as a function:
+var sum = add(3, 4);    // sum is 7
+
+
+11 When a function is invoked with this pattern, this is bound to the global object. This was a mistake in the
+design of the language. Had the language been designed correctly, when the inner function is invoked, this
+would still be bound to the this variable of the outer function. A consequence of this error is that a method
+cannot employ an inner function to help it do its work because the inner function does not share the method's
+access to the object as its this is bound to the wrong value. Fortunately, there is an easy workaround. If the
+method defines a variable and assigns it the value of this, the inner function will have access to this
+through that variable. By convention, the name of that variable is that:
+
+// Augment myObject with a double method.
+myObject.double = function (  ) {
+    var that = this;    // Workaround.
+    var helper = function (  ) {
+        that.value = add(that.value, that.value)
+    };
+    helper(  );    // Invoke helper as a function.
+};
+// Invoke double as a method.
+myObject.double(  );
+document.writeln(myObject.getValue(  ));    // 6
+
+
+===  The Constructor Invocation Pattern ===
+JavaScript is a prototypal inheritance language. That means that objects can inherit properties directly from
+other objects. The language is class-free.
+
+This is a radical departure from the current fashion. Most languages today are classical. Prototypal inheritance
+is powerfully expressive, but is not widely understood. JavaScript itself is not confident in its prototypal
+nature, so it offers an object-making syntax that is reminiscent of the classical languages. Few classical
+programmers found prototypal inheritance to be acceptable, and classically inspired syntax obscures the
+language's true prototypal nature. It is the worst of both worlds.
+
+If a function is invoked with the new prefix, then a new object will be created with a hidden link to the value
+of the function's prototype member, and this will be bound to that new object.
+
+The new prefix also changes the behavior of the return statement. We will see more about that next.
+
+// Create a constructor function called Quo.
+// It makes an object with a status property.
+var Quo = function (string) {
+    this.status = string;
+};
+// Give all instances of Quo a public method
+// called get_status.
+Quo.prototype.get_status = function (  ) {
+    return this.status;
+};
+// Make an instance of Quo.
+var myQuo = new Quo("confused");
+ document.writeln(myQuo.get_status(  ));  // confused
+
+
+Functions that are intended to be used with the new prefix are called constructors. By convention, they are
+kept in variables with a capitalized name. If a constructor is called without the new prefix, very bad things can
+happen without a compile-time or runtime warning, so the capitalization convention is really important.
+Use of this style of constructor functions is not recommended. We will see better alternatives in the next
+chapter.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! READ THIS:   IMPORTANT ENDS.    !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+========= Reflection ===========
+It is easy to inspect an object to determine what properties it has by attempting to retrieve the properties and
+examining the values obtained. The typeof operator can be very helpful in determining the type of a
+property:
+
+typeof flight.number      // 'number'
+typeof flight.status      // 'string'
+typeof flight.arrival     // 'object'
+typeof flight.manifest    // 'undefined'
+
+Some care must be taken because any property on the prototype chain can produce a value:
+
+typeof flight.toString    // 'function'
+typeof flight.constructor // 'function'
+
+There are two approaches to dealing with these undesired properties. The first is to have your program look
+for and reject function values. Generally, when you are reflecting, you are interested in data, and so you
+should be aware that some values could be functions.
+
+The other approach is to use the hasOwnProperty method, which returns true if the object has a
+particular property. The hasOwnProperty method does not look at the prototype chain:
+
+flight.hasOwnProperty('number')         // true
+flight.hasOwnProperty('constructor')    // false
+
+======== 3.7. Enumeration ==========
+The for in statement can loop over all of the property names in an object. The enumeration will include all
+of the propertiesâincluding functions and prototype properties that you might not be interested inâso it is
+necessary to filter out the values you don't want. The most common filters are the hasOwnProperty
+method and using typeof to exclude functions:
+var name;
+for (name in another_stooge) {
+    if (typeof another_stooge[name] !== 'function') {
+        document.writeln(name + ': ' + another_stooge[name]);
+    }
+}

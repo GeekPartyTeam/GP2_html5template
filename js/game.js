@@ -2,6 +2,11 @@
 //namespace
 this.geekpartyjs = this.geekpartyjs || {};
 
+
+Keys = {
+
+};
+
 ( function(){
 
 
@@ -14,6 +19,9 @@ this.geekpartyjs = this.geekpartyjs || {};
     var c;
     var ctx;
     var fps;
+    var fpsMeter;
+
+
 
     var currentScene;
 
@@ -21,6 +29,8 @@ this.geekpartyjs = this.geekpartyjs || {};
         c = (typeof canvas == "string") ? document.getElementById(canvas) : canvas;
         ctx = canvas.getContext("2d");
         fps = 60;
+
+        fpsMeter = new geekpartyjs.FPSMeter("fpsmeter", document.getElementById("fpscontainer"));
 
         p.introScene = new geekpartyjs.IntroScene(c);
     }
@@ -34,6 +44,8 @@ this.geekpartyjs = this.geekpartyjs || {};
     }
 
     p.update = function(dt) {
+        fpsMeter.update(dt);
+
         if (!c) { return; }
 
         p.clear();
@@ -46,28 +58,57 @@ this.geekpartyjs = this.geekpartyjs || {};
         }
 
         ctx.restore();
-    }
 
-    p.setFPS = function(val) {
-        this.fps = val;
+        //draw fps
+        ctx.save();
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font="12px Arial Black";
+        ctx.fillText("FPS: "+ fpsMeter.str_fps,20,20);
+
+        ctx.restore();
     }
 
     var tick = function() {
-        setTimeout(function() {
-            requestAnimationFrame(tick);
-            var now = new Date().getTime(),
-                dt = now - (time || now);
+        requestAnimationFrame(tick);
+        var now = new Date().getTime(),
+        dt = now - (time || now);
 
-            time = now;
-
-            p.update(dt);
-
-        }, 1000 / p.fps);
+        time = now;
+        p.update(dt * 0.001);
     }
 
     p.startGameLoop = function()
     {
         tick();
+
+        c.onmousedown = function (e) {
+            currentScene.onmousedown(e);
+        };
+        c.onmousemove = function (e) {
+            currentScene.onmousemove(e);
+        };
+        c.onmouseup = function (e) {
+            currentScene.onmouseup(e);
+        };
+
+
+        document.onkeydown = function (e) {
+            if (!Keys.hasOwnProperty(e.charCode))
+            {
+                Keys[e.which] = new Date().getTime();
+            }
+        };
+
+        document.onkeypress = function (e) {
+            if (!Keys.hasOwnProperty(e.charCode))
+            {
+                Keys[e.which] = new Date().getTime();
+            }
+        };
+        document.onkeyup = function (e) {
+            delete Keys[e.which];
+        };
     }
 
     p.setCurrentScene = function(scene) {

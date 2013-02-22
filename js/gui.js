@@ -9,28 +9,27 @@ this.geekpartyjs = this.geekpartyjs || {};
 
 ( function() {
 
-    var MenuItem = function(label, x, y) {
-        this.initialize(label, x, y);
+    var MenuItem = function(label) {
+        this.initialize(label);
     }
 
-    p = MenuItem.prototype = {};
+    p = MenuItem.prototype = new geekpartyjs.DisplayObject();
 
-    p.initialize = function(label, x, y)
+    p.initialize = function(label)
     {
         this.label  = label;
-        this.x = x;
-        this.y = y;
         this.active = false;
     }
 
 
-    p.render = function(dt,ctx)
+    p.render = function(ctx)
     {
         ctx.save();
 
         ctx.textBaseline = "middle";
+        ctx.fillStyle = "#ffffff";
         ctx.font="30px Arial";
-        ctx.fillText(this.label,this.x,this.y);
+        ctx.fillText(this.label,0,0);
 
         ctx.restore();
     }

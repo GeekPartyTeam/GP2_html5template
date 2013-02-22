@@ -9,40 +9,28 @@
 //namespace
 this.geekpartyjs = this.geekpartyjs || {};
 
+
+
 //Display Object -
 ( function() {
-    var DisplayObject = function( x, y, ox, oy, w, h)
+    var DisplayObject = function( x,y )
     {
-        this.initialize(x, y, w, h, ox, oy);
+        this.initialize(x,y);
     }
 
     var p = DisplayObject.prototype = {};
 
-    p.initialize = function( x, y, w, h, ox, oy, sx, sy )
+    p.initialize = function( x,y )
     {
         this.childs = [];
 
-        this.x = x || 0;
-        this.y = y || 0;
-        this.width = w || 0;
-        this.height = h || 0;
-        this.ox = isNaN(ox) ?  this.width/2 : ox;
-        this.oy = isNaN(oy) ?  this.height/2 : oy;
-        this.sx = isNaN(sx) ?  1.0 : sx;
-        this.sy = isNaN(sy) ?  1.0 : sy;
+        this.x = x  || 0;
+        this.y = y  || 0;
+        this.ox = 0;
+        this.oy = 0;
+        this.sx = 1.0;
+        this.sy = 1.0;
         this.rotation = 0.0;
-
-        this.validate();
-    }
-
-    p.validate = function()
-    {
-        this.x = isNaN(this.x) ? 0 : this.x;
-        this.y = isNaN(this.y) ? 0 : this.y;
-        this.ox = isNaN(this.ox) ? this.width/2 : this.ox;
-        this.oy = isNaN(this.oy) ? this.height/2 : this.oy;
-        this.sx = isNaN(this.sx) ?  1.0 : this.sx;
-        this.sy = isNaN(this.sy) ?  1.0 : this.sy;
     }
 
     p.addChild = function(child)
@@ -68,14 +56,26 @@ this.geekpartyjs = this.geekpartyjs || {};
 
         //set transformation (Note: javascript multiplies in reversed order);
 
-        ctx.translate(this.x, this.y);
-        ctx.scale(this.sx, this.sy);
-        ctx.rotate(this.rotation);
-        ctx.translate(-this.ox, -this.oy);
+        //translate to position
+        if ((this.x) || (this.y))
+            ctx.translate(this.x, this.y);
+
+        //scale
+        if ((this.sx != 1.0) || (this.sy != 1.0))
+            ctx.scale(this.sx, this.sy);
+
+        //rotate
+        if (this.rotation)
+            ctx.rotate(this.rotation);
+
+        // translate to origin
+        if ((this.ox) || (this.oy))
+            ctx.translate(-this.ox, -this.oy);
 
 
         this.render(ctx);
 
+        //draw childs recursive
         for (i in this.childs)
         {
             this.childs[i].draw(ctx)
@@ -102,18 +102,16 @@ this.geekpartyjs = this.geekpartyjs || {};
     p.initialize = function(canvas)
     {
         if (!canvas) return;
-        //this.entities = [];
-
-        p.width  = canvas.width;
-        p.height = canvas.height;
-        p.validate();
-
     }
 
     p.enterScene = this.enterScene;
     p.update = this.update;
 
 
+
+    p.onmousemove = function(e) {};
+    p.onmousedown = function(e) {};
+    p.onmouseup   = function(e) {};
 
     geekpartyjs.Scene = Scene;
 

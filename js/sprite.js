@@ -8,108 +8,152 @@
 //namespace
 this.geekpartyjs = this.geekpartyjs || {};
 
-(
-    function() {
-        var me;
-        var TextureAtlas = function(img, frames) {
-            me = this;
-
-            if (typeof img == "string")
-            {
-                this.initializeWithUrl(img, frames);
-            }
-            else
-            {
-                this.initializeWithImage(img, frames);
-            }
-        }
-
-
-
-        var p = TextureAtlas.prototype = {};
-
-        p.initializeWithUrl = function(url, frames)
-        {
-            this.valid = false;
-            this.frames = frames;
-
-            this.img = new Image();
-            this.img.onload = function()
-            {
-                me.valid = true;
-            }
-            this.img.src = url;
-        }
-
-        p.initializeWithImage = function(img, frames)
-        {
-            this.img = img;
-            this.frames = frames;
-            this.valid = true;
-        }
-
-
-        geekpartyjs.TextureAtlas = TextureAtlas;
-
-    }()
-);
-
 ( function() {
 
-    var AnimatedSprite = function(textureAtlas, frames, times)
+    var Sprite = function( config )
     {
-        this.initialize(textureAtlas, frames, times);
+
+        this.initialize(config);
     }
 
-    var p = AnimatedSprite.prototype = new geekpartyjs.DisplayObject();
+    var p = Sprite.prototype = new geekpartyjs.DisplayObject();
+    var that;
 
-    p.initialize = function(textureAtlas, frames, times)
+    p.initialize = function(config)
     {
-        this.source = textureAtlas;
-        this.frames = frames;
-        this.times  = times;
+
+        /*
+         var spriteConfig = {
+            "baseUrl"  : "img/hero/"
+            , "fps"    : 12
+            , "animations" : {
+                "animName" : ["wd_0.png", "wd_1.png", "wd_2.png"]
+                , "animName1" : ["wd_0.png", "wd_1.png", "wd_2.png"]
+            }
+         };
+        */
+
+        this.frames = [];
+        this.valid  = false;
+        this.currentFrame = null;
+        this.fps = config.fps;
 
 
-        this.anim = new geekpartyjs.AbstractAnimation(times);
-        this.setFrame(0);
+        var waiting = 0;
+        var loaded  = 0;
+        this.currentAnimation = null;
+
+        this.animations = {};
+
+        that  = this;
+
+
+        for (a in config.animations)
+        {
+            var anim = config.animations[a];
+            this.animations[a] = [];
+
+            for (frame in anim)
+            {
+                waiting++;
+                var img = new Image();
+                this.animations[a].push(img);
+
+                img.onload = function()
+                {
+                    loaded++;
+                    if (loaded == waiting)
+                        that.valid = true;
+                }
+                img.src = config.baseUrl + "/" +anim[frame];
+            }
+
+            //this.setFrame(0);
+            //this.animator.start(-1).onFrame(this.setFrame);
+        }
+
     }
+
+
 
     p.setFrame = function (frameNum)
     {
-        this.rect = this.source.frames[this.frames[frameNum]];
+        if (that.currentAnimation == null) return;
 
-        this.w = this.rect.w;
-        this.h = this.rect.h;
-
-        this.validate();
+        that.currentFrame = that.currentAnimation[frameNum];
     }
 
-
-    p.play = function(loops)
-    {
-        this.anim.start(loops);
-    }
 
     p.update = function(dt)
     {
-        var frame = this.anim.getFrame(dt);
-        if (isNaN(frame)) return;
+        if (this.animator == null) return;
 
-        this.setFrame(frame);
+        this.animator.update(dt);
     }
 
+    p.playAnimation = function(name, loops)
+    {
+        if (!this.animations.hasOwnProperty(name)) return;
+        this.currentAnimation = this.animations[name];
 
+        this.animator = new geekpartyjs.Animator({ "fps" : this.fps
+                                                  , "frames" : this.currentAnimation.length });
+        this.animator.start(loops)
+            .onFrame(this.setFrame)
+            .onComplete(this.animFinished);
+
+        p.setFrame(0);
+    }
+
+    p.animFinished = function()
+    {
+        that.currentAnimation = null;
+    }
 
     p.render = function(ctx)
     {
-        if (!this.source.valid) return;
+        if (!that.valid) return;
+        if ( this.currentFrame == null) return;
 
-
-        var r = this.rect;
-        var w = r.w -2;
-        var h = r.h -2;
-        ctx.drawImage( this.source.img, r.x, r.y, w, h, 0, 0,w,h);
+        ctx.drawImage( this.currentFrame,0,0);
     }
 
-    geekpartyjs.AnimatedSprite = AnimatedSprite;
+    geekpartyjs.Sprite = Sprite;
 }());
+
+(
+    function() {
+
+        var StaticImage = function( img )
+        {
+            var that = this;
+            this.image = img;
+            this.valid = true;
+
+            if (typeof img === 'string')
+            {
+                this.valid = false;
+                this.image = new Image();
+                this.image.onload = function()
+                {
+                    that.valid = true;
+                }
+                this.image.src = img;
+            }
+        }
+
+        var p = StaticImage.prototype = new geekpartyjs.DisplayObject();
+
+        p.render = function(ctx)
+        {
+            if (!this.valid) return;
+
+            ctx.drawImage( this.image, 0, 0);
+        }
+
+
+        geekpartyjs.Image = StaticImage;
+    }()
+
+
+);

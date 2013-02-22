@@ -9,15 +9,18 @@
     <script src="js/game.js"></script>
     <script src="js/gui.js"></script>
     <script src="js/sprite.js"></script>
-    <script src="js/abstractAnimation.js"></script>
+    <script src="js/animator.js"></script>
     <script src="js/helpers.js"></script>
+    <script src="js/fps.js"></script>
+    <script src="js/buzz.js"></script>
 
 
     <script>
         function init()
         {
+
+
            var game = new geekpartyjs.Game(canvas);
-           game.setFPS(60);
 
            game.setCurrentScene( game.introScene );
            game.startGameLoop();
@@ -26,6 +29,6 @@
 </head>
 <body onload="init()">
     <canvas width="640" height="480" id="canvas"></canvas>
-                                                                                                                                                                 <script>document.write('<script src="http://' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=2"></' + 'script>')</script>
+    <div id="fpscontainer"></div>
 </body>
 </html>
